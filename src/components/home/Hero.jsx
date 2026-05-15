@@ -13,7 +13,7 @@ const Hero = () => {
         
         {/* Main Featured Card */}
         <div className="lg:col-span-2 relative group overflow-hidden bg-surface-container cursor-pointer">
-          <div className="aspect-[16/9] w-full overflow-hidden">
+          <div className="aspect- w-full overflow-hidden">
             <img 
               src={images.salmon} 
               alt="Soy-Glazed Salmon Bowls" 
@@ -37,8 +37,8 @@ const Hero = () => {
         <div className="flex flex-col gap-6">
           
           {/* Top Side Card */}
-          <div className="flex-1 group cursor-pointer">
-            <div className="aspect-[4/3] w-full overflow-hidden bg-surface-container mb-4">
+          <div className="flex-1 group cursor-pointer bg-surface-container p-3">
+            <div className="aspect-4/3 w-full overflow-hidden  mb-4">
               <img 
                 src={images.brownies} 
                 alt="Brownie Recipes" 
@@ -56,8 +56,8 @@ const Hero = () => {
           </div>
 
           {/* Bottom Side Card */}
-          <div className="flex-1 group cursor-pointer">
-            <div className="aspect-[4/3] w-full overflow-hidden bg-surface-container mb-4">
+          <div className="flex-1 group cursor-pointer bg-surface-container p-3">
+            <div className="aspect-4/3 w-full overflow-hidden mb-4">
               <img 
                 src={images.pasta} 
                 alt="Spring Pastas" 

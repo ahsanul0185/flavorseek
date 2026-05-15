@@ -20,7 +20,7 @@ const Header = () => {
         <div className="shrink-0">
           <a href="/" className="group block">
             <h1 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.03em] text-primary transition-colors hover:text-secondary">
-              SimpleSpoon
+              FlavorSeek
               <span className="block h-px w-0 bg-secondary transition-all group-hover:w-full"></span>
             </h1>
           </a>

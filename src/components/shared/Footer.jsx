@@ -8,7 +8,7 @@ const Footer = () => {
           
           <div className="max-w-xs">
             <h2 className="font-display text-2xl font-bold text-primary mb-4">
-              SimpleSpoon
+              FlavorSeek
             </h2>
             <p className="font-body text-sm text-on-surface-variant leading-relaxed">
               A curated collection of culinary heritage, bringing the sun-drenched flavors of the Mediterranean to your kitchen.
