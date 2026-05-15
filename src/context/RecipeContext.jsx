@@ -1,23 +1,32 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { getRecipesByIngredients } from '../services/home';
 
 const RecipeContext = createContext();
 
 export const RecipeProvider = ({ children }) => {
   const [recipes, setRecipes] = useState([]);
+  const [allRecipes, setAllRecipes] = useState([]); // Store all fetched recipes
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [ingredients, setIngredients] = useState('');
+  
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const resultsPerPage = 10;
 
-  // Function to fetch recipes - can be expanded as needed
-  const fetchRecipes = async (query) => {
+  const searchIngredientsByItems = async (items) => {
+    if (!items || !items.trim()) return;
+
     setLoading(true);
     setError(null);
     try {
-      // User will implement their specific fetch logic here
-      // For now, this is a placeholder
-      console.log(`Fetching recipes for: ${query}`);
-      // const response = await fetch(`API_URL?q=${query}`);
-      // const data = await response.json();
-      // setRecipes(data.hits || []);
+      // Always fetch fresh when a new search is initiated
+      const data = await getRecipesByIngredients(items, 100);
+      setAllRecipes(data || []);
+      setTotalResults((data || []).length);
+      setPage(1); // Reset to first page on new search
+      setIngredients(items);
     } catch (err) {
       setError('Failed to fetch recipes. Please try again.');
       console.error(err);
@@ -26,6 +35,17 @@ export const RecipeProvider = ({ children }) => {
     }
   };
 
+  // Effect to handle client-side pagination slicing
+  useEffect(() => {
+    if (allRecipes.length > 0) {
+      const startIndex = (page - 1) * resultsPerPage;
+      const paginatedData = allRecipes.slice(startIndex, startIndex + resultsPerPage);
+      setRecipes(paginatedData);
+    } else {
+      setRecipes([]);
+    }
+  }, [allRecipes, page, resultsPerPage]);
+
   const value = {
     recipes,
     setRecipes,
@@ -33,7 +53,13 @@ export const RecipeProvider = ({ children }) => {
     setLoading,
     error,
     setError,
-    fetchRecipes
+    ingredients,
+    setIngredients,
+    page,
+    setPage,
+    totalResults,
+    resultsPerPage,
+    searchIngredientsByItems
   };
 
   return (
@@ -50,3 +76,4 @@ export const useRecipes = () => {
   }
   return context;
 };
+

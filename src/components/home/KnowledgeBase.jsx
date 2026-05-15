@@ -33,16 +33,13 @@ const KnowledgeBase = () => {
             Expert Advice & Culinary Techniques
           </h2>
         </div>
-        <a href="#" className="font-body text-[10px] tracking-widest uppercase font-bold text-primary hover:text-secondary transition-colors pb-1 border-b border-primary/20">
-          View All Guides
-        </a>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 items-center">
         <div className="overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1534445867742-43195f401b6c?auto=format&fit=crop&q=80&w=800&h=600" 
-            alt="Cooking techniques" 
+          <img
+            src="https://images.unsplash.com/photo-1534445867742-43195f401b6c?auto=format&fit=crop&q=80&w=800&h=600"
+            alt="Cooking techniques"
             className="w-full h-full object-cover"
           />
         </div>
@@ -57,24 +54,6 @@ const KnowledgeBase = () => {
             Read the Full Guide
           </button>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {articles.map((article, index) => (
-          <div key={index} className="flex gap-6 items-start group cursor-pointer bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center text-3xl bg-surface-container">
-              {article.icon}
-            </div>
-            <div>
-              <h4 className="font-display text-base font-bold text-primary mb-2 group-hover:text-secondary transition-colors">
-                {article.title}
-              </h4>
-              <p className="font-body text-xs text-on-surface-variant leading-relaxed">
-                {article.description}
-              </p>
-            </div>
-          </div>
-        ))}
       </div>
     </section>
   );
