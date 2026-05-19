@@ -1,32 +1,32 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getRecipesByIngredients } from '../services/home';
+import { getEdamamRecipes } from '../services/edamam';
 
 const RecipeContext = createContext();
 
 export const RecipeProvider = ({ children }) => {
   const [recipes, setRecipes] = useState([]);
-  const [allRecipes, setAllRecipes] = useState([]); // Store all fetched recipes
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ingredients, setIngredients] = useState('');
-  
-  // Pagination state
+  const [healthFilters, setHealthFilters] = useState([]);
+
+  // Pagination state mapping page numbers (1-indexed) to the URL needed to fetch that page
+  // pageTokens[1] == url for page 2. pageTokens[0] == null (base search)
+  const [pageTokens, setPageTokens] = useState([null]);
   const [page, setPage] = useState(1);
-  const [totalResults, setTotalResults] = useState(0);
-  const resultsPerPage = 10;
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  const searchIngredientsByItems = async (items) => {
-    if (!items || !items.trim()) return;
-
+  const performSearch = async (q, filters) => {
     setLoading(true);
     setError(null);
     try {
-      // Always fetch fresh when a new search is initiated
-      const data = await getRecipesByIngredients(items, 100);
-      setAllRecipes(data || []);
-      setTotalResults((data || []).length);
-      setPage(1); // Reset to first page on new search
-      setIngredients(items);
+      const data = await getEdamamRecipes({ q, healthFilters: filters });
+      setRecipes(data.hits.map(hit => hit.recipe) || []);
+
+      const nextUrl = data._links?.next?.href || null;
+      setPageTokens([null, nextUrl]);
+      setPage(1);
+      setHasNextPage(!!nextUrl);
     } catch (err) {
       setError('Failed to fetch recipes. Please try again.');
       console.error(err);
@@ -35,16 +35,45 @@ export const RecipeProvider = ({ children }) => {
     }
   };
 
-  // Effect to handle client-side pagination slicing
-  useEffect(() => {
-    if (allRecipes.length > 0) {
-      const startIndex = (page - 1) * resultsPerPage;
-      const paginatedData = allRecipes.slice(startIndex, startIndex + resultsPerPage);
-      setRecipes(paginatedData);
-    } else {
-      setRecipes([]);
+  const searchIngredientsByItems = async (items) => {
+    const newIngredients = items === null ? ingredients : items;
+    setIngredients(newIngredients);
+    await performSearch(newIngredients, healthFilters);
+  };
+
+  const updateHealthFilters = async (filters) => {
+    setHealthFilters(filters);
+    await performSearch(ingredients, filters);
+  };
+
+  const fetchPage = async (pageNumber) => {
+    if (pageNumber === 1) {
+      await performSearch(ingredients, healthFilters);
+      return;
     }
-  }, [allRecipes, page, resultsPerPage]);
+    const url = pageTokens[pageNumber - 1];
+    if (!url) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getEdamamRecipes({ url });
+      setRecipes(data.hits.map(hit => hit.recipe) || []);
+
+      const nextUrl = data._links?.next?.href || null;
+      setPageTokens(prev => {
+        const nextTokens = [...prev];
+        nextTokens[pageNumber] = nextUrl;
+        return nextTokens;
+      });
+      setPage(pageNumber);
+      setHasNextPage(!!nextUrl);
+    } catch (err) {
+      setError('Failed to fetch page. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const value = {
     recipes,
@@ -55,11 +84,19 @@ export const RecipeProvider = ({ children }) => {
     setError,
     ingredients,
     setIngredients,
+    healthFilters,
+    updateHealthFilters,
+
     page,
-    setPage,
-    totalResults,
-    resultsPerPage,
-    searchIngredientsByItems
+    setPage: fetchPage,
+    hasNextPage,
+
+    // Kept to avoid breaking existing usages
+    totalResults: 0,
+    resultsPerPage: 20,
+
+    searchIngredientsByItems,
+    performSearch
   };
 
   return (
@@ -76,4 +113,3 @@ export const useRecipes = () => {
   }
   return context;
 };
-

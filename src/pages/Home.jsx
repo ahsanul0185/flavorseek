@@ -1,53 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import IngredientSearchBar from '../components/recipes/IngredientSearchBar';
 import RecipeCard from '../components/recipes/RecipeCard';
-
-const DUMMY_RECIPES = [
-  {
-    id: 1,
-    title: "Garlic Butter Chicken and Rice",
-    image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=800",
-    readyInMinutes: 30,
-    sourceUrl: "https://example.com/recipe1",
-  },
-  {
-    id: 2,
-    title: "Broccoli and Cheese Stuffed Chicken",
-    image: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?auto=format&fit=crop&q=80&w=800",
-    readyInMinutes: 45,
-    sourceUrl: "https://example.com/recipe2",
-  },
-  {
-    id: 3,
-    title: "Vegetable Stir Fry with Rice",
-    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&q=80&w=800",
-    readyInMinutes: 20,
-    sourceUrl: "https://example.com/recipe3",
-  },
-  {
-    id: 4,
-    title: "Spicy Lemon Garlic Shrimp",
-    image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=800",
-    readyInMinutes: 15,
-    sourceUrl: "https://example.com/recipe4",
-  }
-];
+import Pagination from '../components/recipes/Pagination';
+import { useRecipes } from '../context/RecipeContext';
 
 const DIETARY_FILTERS = [
   { id: 'vegan', label: 'Vegan' },
+  { id: 'vegetarian', label: 'Vegetarian' },
   { id: 'gluten-free', label: 'Gluten Free' },
-  { id: 'peanut-free', label: 'Peanuts' },
+  { id: 'dairy-free', label: 'Dairy Free' },
+  { id: 'peanut-free', label: 'Peanut Free' },
+  { id: 'keto-friendly', label: 'Keto' },
+  { id: 'low-sugar', label: 'Low Sugar' },
+  { id: 'pescatarian', label: 'Pescatarian' },
 ];
 
 const Home = () => {
-  const [activeFilters, setActiveFilters] = useState([]);
+  const { 
+    recipes, 
+    loading, 
+    error, 
+    healthFilters, 
+    ingredients,
+    updateHealthFilters,
+    searchIngredientsByItems,
+    performSearch
+  } = useRecipes();
+
+  const [searchParams] = useSearchParams();
+
+  // Fetch initial random recipes if no search params exist and we haven't already
+  useEffect(() => {
+    const urlIngredients = searchParams.get('ingredients');
+    if (!urlIngredients && recipes.length === 0 && !loading && !error) {
+       performSearch('random', healthFilters);
+    }
+  }, []);
+
+  // Sync URL to search state on mount or when URL changes
+  useEffect(() => {
+    const urlIngredients = searchParams.get('ingredients');
+    if (urlIngredients !== null && urlIngredients !== ingredients) {
+      searchIngredientsByItems(urlIngredients);
+    }
+  }, [searchParams, ingredients]); // added ingredients just to be safe
 
   const toggleFilter = (filterId) => {
-    setActiveFilters(prev => 
-      prev.includes(filterId) 
-        ? prev.filter(id => id !== filterId)
-        : [...prev, filterId]
-    );
+    const newFilters = healthFilters.includes(filterId)
+      ? healthFilters.filter(id => id !== filterId)
+      : [...healthFilters, filterId];
+    
+    updateHealthFilters(newFilters);
   };
 
   return (
@@ -56,27 +60,58 @@ const Home = () => {
       <IngredientSearchBar />
 
       {/* Dietary Filters */}
-      <div className="flex flex-wrap justify-center gap-3 mb-12 mt-[-2rem]">
-        {DIETARY_FILTERS.map(filter => (
-          <button
-            key={filter.id}
-            onClick={() => toggleFilter(filter.id)}
-            className={`px-6 py-2 rounded-full border text-sm font-bold uppercase tracking-wider transition-colors ${
-              activeFilters.includes(filter.id)
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-primary border-primary/20 hover:border-primary'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-4 mb-8 md:mb-12 mt-[-2rem] w-full px-margin-mobile md:px-0">
+        <span className="text-sm font-bold text-on-surface-variant uppercase tracking-widest">
+          Filter by:
+        </span>
+        <div className="flex overflow-x-auto w-full pb-4 justify-start md:justify-center md:flex-wrap gap-2 md:gap-3" style={{ scrollbarWidth: 'none' }}>
+          {DIETARY_FILTERS.map(filter => (
+            <button
+              key={filter.id}
+              onClick={() => toggleFilter(filter.id)}
+              className={`flex-shrink-0 px-5 md:px-6 py-2 rounded-full border text-xs md:text-sm font-bold uppercase tracking-wider transition-colors ${
+                healthFilters.includes(filter.id)
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-primary border-primary/20 hover:border-primary cursor-pointer'
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Results Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {DUMMY_RECIPES.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
-        ))}
+      <div className="flex flex-col min-h-[400px]">
+        {error && (
+            <div className="p-8 bg-red-50 border border-red-100 text-red-600 text-center font-body text-sm mb-8">
+              {error}
+            </div>
+        )}
+        
+        {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 animate-pulse w-full">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                <div key={i} className="aspect-[4/3] bg-surface-container/50 border border-primary/5"></div>
+                ))}
+            </div>
+        ) : recipes.length > 0 ? (
+            <>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+                    {recipes.map((recipe, index) => (
+                    <RecipeCard key={`${recipe.uri || recipe.id}-${index}`} recipe={recipe} />
+                    ))}
+                </div>
+                {/* Pagination */}
+                <div className="mt-8">
+                  <Pagination />
+                </div>
+            </>
+        ) : !loading && (
+            <div className="text-center py-20 bg-surface-container/30 border border-primary/10">
+                <p className="font-body text-on-surface-variant">No recipes found. Try adjusting your search or filters.</p>
+            </div>
+        )}
       </div>
     </div>
   );
