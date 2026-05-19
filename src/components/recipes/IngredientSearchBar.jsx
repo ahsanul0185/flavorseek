@@ -42,7 +42,7 @@ const IngredientSearchBar = () => {
         <button 
           type="submit"
           disabled={loading}
-          className="bg-primary text-white px-10 py-4 text-[10px] tracking-[0.2em] font-bold uppercase hover:bg-secondary transition-colors disabled:opacity-50"
+          className="bg-primary text-white px-10 py-4 text-sm cursor-pointer hover:bg-secondary transition-colors disabled:opacity-50"
         >
           {loading ? 'Searching...' : 'Find Recipes'}
         </button>

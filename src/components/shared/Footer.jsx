@@ -37,8 +37,8 @@ const Footer = () => {
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="font-body text-[10px] tracking-widest uppercase text-white/40">
-            © 2026 Mediterráneo Editorial. All rights reserved.
+          <p className="text-[10px] tracking-widest text-white/40">
+            © 2026 FlavorSeek. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-white/40 hover:text-white transition-colors">
