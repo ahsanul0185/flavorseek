@@ -75,6 +75,12 @@ export const RecipeProvider = ({ children }) => {
     }
   };
 
+  const clearSearch = async () => {
+    setIngredients('');
+    setHealthFilters([]);
+    await performSearch('random', []);
+  };
+
   const value = {
     recipes,
     setRecipes,
@@ -96,7 +102,8 @@ export const RecipeProvider = ({ children }) => {
     resultsPerPage: 20,
 
     searchIngredientsByItems,
-    performSearch
+    performSearch,
+    clearSearch
   };
 
   return (

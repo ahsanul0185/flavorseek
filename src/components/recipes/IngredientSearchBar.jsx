@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useRecipes } from '../../context/RecipeContext';
 
 const IngredientSearchBar = () => {
-  const { searchIngredientsByItems, loading } = useRecipes();
+  const { searchIngredientsByItems, loading, clearSearch } = useRecipes();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState(searchParams.get('ingredients') || '');
 
@@ -20,6 +20,11 @@ const IngredientSearchBar = () => {
     if (localSearch.trim()) {
       // Update URL which will trigger the fetch in Recipes.jsx
       setSearchParams({ ingredients: localSearch.trim() });
+    } else {
+      // Clear URL and fetch a randomized baseline if search is empty
+      setSearchParams({});
+      setLocalSearch('');
+      clearSearch();
     }
   };
 

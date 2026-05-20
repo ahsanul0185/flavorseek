@@ -8,10 +8,9 @@ const Header = () => {
         
         {/* Logo - Elegant Editorial Serif */}
         <div className="shrink-0 flex items-center gap-12">
-          <Link to="/" className="group block">
-            <h1 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.03em] text-primary transition-colors hover:text-secondary">
+          <Link to="/" className="block">
+            <h1 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.03em] text-primary">
               FlavorSeek
-              <span className="block h-px w-0 bg-secondary transition-all group-hover:w-full"></span>
             </h1>
           </Link>
         </div>
