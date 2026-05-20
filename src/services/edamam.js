@@ -11,18 +11,29 @@ export const getEdamamRecipes = async ({ q, healthFilters = [], url = null }) =>
     }
 
     const params = new URLSearchParams({
-        type: 'public',
+        type: 'public', // Must be 'public' to ensure properly vetted health labels
         app_id: import.meta.env.VITE_EDAMAM_APP_ID,
         app_key: import.meta.env.VITE_EDAMAM_APP_KEY,
     });
 
-    if (q) {
+    if (q && q !== 'random') {
         params.append('q', q);
+    } else if (q === 'random') {
+        params.append('random', 'true');
+        
+        // API requires either 'q' or a filter parameter to be present.
+        if (healthFilters.length === 0) {
+            // Add a broad search term to avoid API 400 Bad Request if no filters
+            const broadTerms = ['dinner', 'lunch', 'breakfast', 'snack', 'healthy', 'quick'];
+            const randomTerm = broadTerms[Math.floor(Math.random() * broadTerms.length)];
+            params.append('q', randomTerm);
+        }
     } else if (healthFilters.length === 0) {
-        // Fallback or default query when nothing is specified
-        params.append('q', 'random');
+        // If everything is completely empty, provide a fallback to prevent failure
+        params.append('q', 'dinner');
     }
 
+    // Append all selected health labels
     healthFilters.forEach(f => {
         params.append('health', f);
     });
@@ -32,6 +43,8 @@ export const getEdamamRecipes = async ({ q, healthFilters = [], url = null }) =>
             'Edamam-Account-User': import.meta.env.VITE_EDAMAM_ACCOUNT_USER || 'ahsanul'
         }
     });
+
+    console.log(res.data)
 
     return res.data;
 };

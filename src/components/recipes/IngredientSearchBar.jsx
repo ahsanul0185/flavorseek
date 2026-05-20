@@ -37,7 +37,7 @@ const IngredientSearchBar = () => {
           placeholder="e.g. apples, flour, sugar"
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
-          className="flex-1 bg-surface-container/50 border-b-2 border-primary/10 py-4 px-6 text-sm font-body focus:outline-none focus:border-secondary transition-colors"
+          className="flex-1 bg-surface-container/10 border-b-2 border-primary/10 py-4 px-6 text-sm font-body focus:outline-none focus:border-secondary transition-colors"
         />
         <button 
           type="submit"
