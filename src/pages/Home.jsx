@@ -19,10 +19,7 @@ const Home = () => {
     error, 
     healthFilters, 
     ingredients,
-    updateHealthFilters,
-    searchIngredientsByItems,
     performSearch,
-    clearSearch,
     syncSearchState
   } = useRecipes();
 
