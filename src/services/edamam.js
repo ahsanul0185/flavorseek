@@ -44,7 +44,17 @@ export const getEdamamRecipes = async ({ q, healthFilters = [], url = null }) =>
         }
     });
 
-    console.log(res.data)
+    if (q && q !== 'random') {
+        const searchTerms = q.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+        
+        if (searchTerms.length > 0) {
+            res.data.hits = res.data.hits.filter(hit => {
+                const ingredientsText = hit.recipe.ingredientLines.join(' ').toLowerCase();
+                // Ensure every comma-separated search term exists at least once in the ingredients
+                return searchTerms.every(term => ingredientsText.includes(term));
+            });
+        }
+    }
 
     return res.data;
 };

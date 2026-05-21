@@ -9,11 +9,7 @@ const DIETARY_FILTERS = [
   { id: 'vegan', label: 'Vegan' },
   { id: 'vegetarian', label: 'Vegetarian' },
   { id: 'gluten-free', label: 'Gluten Free' },
-  { id: 'dairy-free', label: 'Dairy Free' },
-  { id: 'peanut-free', label: 'Peanut Free' },
-  { id: 'keto-friendly', label: 'Keto' },
-  { id: 'low-sugar', label: 'Low Sugar' },
-  { id: 'pescatarian', label: 'Pescatarian' },
+  { id: 'peanut-free', label: 'Peanut Free' }
 ];
 
 const Home = () => {
