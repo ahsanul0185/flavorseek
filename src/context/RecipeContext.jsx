@@ -38,12 +38,14 @@ export const RecipeProvider = ({ children }) => {
   const searchIngredientsByItems = async (items) => {
     const newIngredients = items === null ? ingredients : items;
     setIngredients(newIngredients);
-    await performSearch(newIngredients, healthFilters);
+    setHealthFilters([]);
+    await performSearch(newIngredients, []);
   };
 
   const updateHealthFilters = async (filters) => {
     setHealthFilters(filters);
-    await performSearch(ingredients, filters);
+    setIngredients('');
+    await performSearch('', filters);
   };
 
   const fetchPage = async (pageNumber) => {

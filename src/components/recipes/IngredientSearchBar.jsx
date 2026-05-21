@@ -12,6 +12,8 @@ const IngredientSearchBar = () => {
     const urlIngredients = searchParams.get('ingredients');
     if (urlIngredients !== null) {
       setLocalSearch(urlIngredients);
+    } else {
+      setLocalSearch(''); 
     }
   }, [searchParams]);
 

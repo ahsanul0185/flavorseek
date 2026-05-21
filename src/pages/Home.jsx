@@ -25,33 +25,46 @@ const Home = () => {
     ingredients,
     updateHealthFilters,
     searchIngredientsByItems,
-    performSearch
+    performSearch,
+    clearSearch
   } = useRecipes();
 
-  const [searchParams] = useSearchParams();
-
-  // Fetch initial random recipes if no search params exist and we haven't already
-  useEffect(() => {
-    const urlIngredients = searchParams.get('ingredients');
-    if (!urlIngredients && recipes.length === 0 && !loading && !error) {
-       performSearch('random', healthFilters);
-    }
-  }, []);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Sync URL to search state on mount or when URL changes
   useEffect(() => {
     const urlIngredients = searchParams.get('ingredients');
-    if (urlIngredients !== null && urlIngredients !== ingredients) {
-      searchIngredientsByItems(urlIngredients);
+    const urlFilters = searchParams.get('filters');
+
+    if (urlIngredients !== null) {
+      if (urlIngredients !== ingredients) {
+        searchIngredientsByItems(urlIngredients);
+      }
+    } else if (urlFilters !== null) {
+      const filtersArray = urlFilters.split(',');
+      if (filtersArray.join(',') !== healthFilters.join(',')) {
+        updateHealthFilters(filtersArray);
+      }
+    } else {
+      if (ingredients !== '' || healthFilters.length > 0) {
+         clearSearch(); // Ensure context is cleared if URL has no params
+      } else if (recipes.length === 0 && !loading && !error) {
+         // Initial load 
+         performSearch('random', []);
+      }
     }
-  }, [searchParams, ingredients]); // added ingredients just to be safe
+  }, [searchParams, ingredients, healthFilters]); 
 
   const toggleFilter = (filterId) => {
     const newFilters = healthFilters.includes(filterId)
       ? healthFilters.filter(id => id !== filterId)
       : [...healthFilters, filterId];
     
-    updateHealthFilters(newFilters);
+    if (newFilters.length > 0) {
+      setSearchParams({ filters: newFilters.join(',') });
+    } else {
+      setSearchParams({});
+    }
   };
 
   return (
