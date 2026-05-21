@@ -19,13 +19,17 @@ const IngredientSearchBar = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (localSearch.trim()) {
-      // Update URL which will trigger the fetch in Recipes.jsx
-      setSearchParams({ ingredients: localSearch.trim() });
-    } else {
-      // Clear URL and fetch a randomized baseline if search is empty
-      setSearchParams({});
-      setLocalSearch('');
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev);
+      if (localSearch.trim()) {
+        p.set('ingredients', localSearch.trim());
+      } else {
+        p.delete('ingredients');
+      }
+      return p;
+    });
+
+    if (!localSearch.trim() && !searchParams.has('filters')) {
       clearSearch();
     }
   };

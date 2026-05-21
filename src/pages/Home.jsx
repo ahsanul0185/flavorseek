@@ -26,31 +26,41 @@ const Home = () => {
     updateHealthFilters,
     searchIngredientsByItems,
     performSearch,
-    clearSearch
+    clearSearch,
+    syncSearchState
   } = useRecipes();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Sync URL to search state on mount or when URL changes
   useEffect(() => {
-    const urlIngredients = searchParams.get('ingredients');
-    const urlFilters = searchParams.get('filters');
+    const urlIngredients = searchParams.get('ingredients') || '';
+    const urlFilters = searchParams.get('filters') ? searchParams.get('filters').split(',') : [];
 
-    if (urlIngredients !== null) {
-      if (urlIngredients !== ingredients) {
-        searchIngredientsByItems(urlIngredients);
-      }
-    } else if (urlFilters !== null) {
-      const filtersArray = urlFilters.split(',');
-      if (filtersArray.join(',') !== healthFilters.join(',')) {
-        updateHealthFilters(filtersArray);
-      }
+    let needsSync = false;
+    let nextIngredients = ingredients;
+    let nextFilters = healthFilters;
+
+    if (urlIngredients !== ingredients) {
+      nextIngredients = urlIngredients === '' ? null : urlIngredients; // Wait, items===null means keep existing in context function! I should just pass '' instead to clear it.
+      // Actually Context sets '' if it's not null. So passing '' is correct for clearing.
+      // Wait, in searchIngredientsByItems: `items === null ? ingredients : items`. So '' means clear.
+      nextIngredients = urlIngredients; 
+      needsSync = true;
+    }
+    
+    if (urlFilters.join(',') !== healthFilters.join(',')) {
+      nextFilters = urlFilters;
+      needsSync = true;
+    }
+
+    if (needsSync) {
+       syncSearchState(nextIngredients, nextFilters);
     } else {
-      if (ingredients !== '' || healthFilters.length > 0) {
-         clearSearch(); // Ensure context is cleared if URL has no params
-      } else if (recipes.length === 0 && !loading && !error) {
-         // Initial load 
-         performSearch('random', []);
+      if (ingredients === '' && healthFilters.length === 0) {
+         if (recipes.length === 0 && !loading && !error) {
+           performSearch('random', []);
+         }
       }
     }
   }, [searchParams, ingredients, healthFilters]); 
@@ -60,11 +70,12 @@ const Home = () => {
       ? healthFilters.filter(id => id !== filterId)
       : [...healthFilters, filterId];
     
-    if (newFilters.length > 0) {
-      setSearchParams({ filters: newFilters.join(',') });
-    } else {
-      setSearchParams({});
-    }
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev);
+      if (newFilters.length > 0) p.set('filters', newFilters.join(','));
+      else p.delete('filters');
+      return p;
+    });
   };
 
   return (

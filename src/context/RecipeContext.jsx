@@ -38,14 +38,18 @@ export const RecipeProvider = ({ children }) => {
   const searchIngredientsByItems = async (items) => {
     const newIngredients = items === null ? ingredients : items;
     setIngredients(newIngredients);
-    setHealthFilters([]);
-    await performSearch(newIngredients, []);
+    await performSearch(newIngredients, healthFilters);
   };
 
   const updateHealthFilters = async (filters) => {
     setHealthFilters(filters);
-    setIngredients('');
-    await performSearch('', filters);
+    await performSearch(ingredients, filters);
+  };
+
+  const syncSearchState = async (newIngredients, newFilters) => {
+    setIngredients(newIngredients);
+    setHealthFilters(newFilters);
+    await performSearch(newIngredients, newFilters);
   };
 
   const fetchPage = async (pageNumber) => {
@@ -105,7 +109,8 @@ export const RecipeProvider = ({ children }) => {
 
     searchIngredientsByItems,
     performSearch,
-    clearSearch
+    clearSearch,
+    syncSearchState
   };
 
   return (
